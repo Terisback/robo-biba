@@ -5,13 +5,38 @@ import (
 	"log"
 	"strconv"
 
+	"github.com/Terisback/robo-biba/internal/command"
 	"github.com/andersfylling/disgord"
 )
 
 const roleOfActivePeople = 665980888869371955
 
 func Online(s disgord.Session, e *disgord.MessageCreate) {
+	var roleID uint64
+
+	args, err := command.GetArgsFromContext(e.Ctx)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	if len(args) == 2 {
+		roleID, err = strconv.ParseUint(args[1], 10, 64)
+		if err != nil {
+			log.Println(err)
+			roleID = roleOfActivePeople
+		}
+	} else {
+		roleID = roleOfActivePeople
+	}
+
 	g, err := s.GetGuild(context.Background(), e.Message.GuildID)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	role, err := g.Role(disgord.NewSnowflake(roleID))
 	if err != nil {
 		log.Println(err)
 		return
@@ -30,7 +55,7 @@ func Online(s disgord.Session, e *disgord.MessageCreate) {
 			}
 
 			for _, r := range u.Roles {
-				if r == disgord.NewSnowflake(roleOfActivePeople) {
+				if r == role.ID {
 					activeOnline += 1
 				}
 			}
@@ -40,7 +65,7 @@ func Online(s disgord.Session, e *disgord.MessageCreate) {
 	allActive := 0
 	for _, i := range g.Members {
 		for _, r := range i.Roles {
-			if r == disgord.NewSnowflake(roleOfActivePeople) {
+			if r == role.ID {
 				allActive += 1
 			}
 		}
@@ -56,7 +81,7 @@ func Online(s disgord.Session, e *disgord.MessageCreate) {
 					Inline: true,
 				},
 				&disgord.EmbedField{
-					Name:   "Активных",
+					Name:   role.Name,
 					Value:  "Всего: " + strconv.Itoa(allActive) + "\n" + "Онлайн: " + strconv.Itoa(activeOnline),
 					Inline: true,
 				},

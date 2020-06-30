@@ -30,5 +30,11 @@ func main() {
 		mdl.FilterAliases("o", "online", "о", "онлайн"),
 		handlers.Online)
 
+	dg.On(disgord.EvtMessageCreate,
+		mdl.FilterBotMessages,
+		mdl.FilterPrefix(prefix),
+		mdl.FilterAliases("w", "when", "к", "когда"),
+		handlers.When)
+
 	log.Println("Bot is started!")
 }
