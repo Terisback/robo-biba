@@ -1,55 +1,69 @@
 package handlers
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"strconv"
 
-	"github.com/Terisback/robo-biba/internal/utils"
-	"github.com/bwmarrin/discordgo"
+	"github.com/andersfylling/disgord"
 )
 
-const (
-	onlineTitleF = "Онлайн %s"
-)
+const roleOfActivePeople = 665980888869371955
 
-func Online(s *discordgo.Session, e *discordgo.MessageCreate) {
-	if err := utils.CheckValid(s, e); err != nil {
-		return
-	}
-
-	if !utils.CheckCommand(e.Content, "online", "онлайн", "o", "о", "stat", "стат") {
-		return
-	}
-
-	guild, err := s.Guild(e.GuildID)
+func Online(s disgord.Session, e *disgord.MessageCreate) {
+	g, err := s.GetGuild(context.Background(), e.Message.GuildID)
 	if err != nil {
-		log.Println("Can't get guild with", e.GuildID, "id,", err)
+		log.Println(err)
 		return
 	}
 
-	if err := s.RequestGuildMembers(e.GuildID, "", 0, true); err != nil {
-		log.Println("Can't get presences from", e.GuildID, "id,", err)
-		return
-	}
-
+	activeOnline := 0
 	online := 0
-	for _, member := range guild.Presences {
-		if member.Status != discordgo.StatusOffline {
-			online++
+	for _, i := range g.Presences {
+		if i.Status != "offline" {
+			online += 1
+
+			u, err := g.Member(i.User.ID)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
+			for _, r := range u.Roles {
+				if r == disgord.NewSnowflake(roleOfActivePeople) {
+					activeOnline += 1
+				}
+			}
 		}
 	}
 
-	if _, err := s.ChannelMessageSendEmbed(e.ChannelID, &discordgo.MessageEmbed{
-		Title: fmt.Sprintf(onlineTitleF, guild.Name),
-		Fields: []*discordgo.MessageEmbedField{
-			{
-				Name:  "Всего: " + strconv.Itoa(guild.MemberCount),
-				Value: "Онлайн: " + strconv.Itoa(online),
+	allActive := 0
+	for _, i := range g.Members {
+		for _, r := range i.Roles {
+			if r == disgord.NewSnowflake(roleOfActivePeople) {
+				allActive += 1
+			}
+		}
+	}
+
+	_, err = e.Message.Reply(context.Background(), s,
+		disgord.Embed{
+			Title: "Онлайн " + g.Name,
+			Fields: []*disgord.EmbedField{
+				&disgord.EmbedField{
+					Name:   "Общак",
+					Value:  "Всего: " + strconv.Itoa(int(g.MemberCount)) + "\n" + "Онлайн: " + strconv.Itoa(online),
+					Inline: true,
+				},
+				&disgord.EmbedField{
+					Name:   "Активных",
+					Value:  "Всего: " + strconv.Itoa(allActive) + "\n" + "Онлайн: " + strconv.Itoa(activeOnline),
+					Inline: true,
+				},
 			},
-		},
-	}); err != nil {
-		log.Println("Message wasn't sent, ", err)
+		})
+	if err != nil {
+		log.Println(err)
 		return
 	}
 }
