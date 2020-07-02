@@ -5,7 +5,7 @@ import (
 	"errors"
 	"log"
 
-	"github.com/Terisback/robo-biba/internal/command"
+	"github.com/Terisback/robo-biba/command"
 	"github.com/andersfylling/disgord"
 )
 
