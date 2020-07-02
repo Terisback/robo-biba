@@ -75,12 +75,12 @@ func Online(s disgord.Session, e *disgord.MessageCreate) {
 		disgord.Embed{
 			Title: "Онлайн " + g.Name,
 			Fields: []*disgord.EmbedField{
-				&disgord.EmbedField{
+				{
 					Name:   "Общак",
 					Value:  "Всего: " + strconv.Itoa(int(g.MemberCount)) + "\n" + "Онлайн: " + strconv.Itoa(online),
 					Inline: true,
 				},
-				&disgord.EmbedField{
+				{
 					Name:   role.Name,
 					Value:  "Всего: " + strconv.Itoa(allActive) + "\n" + "Онлайн: " + strconv.Itoa(activeOnline),
 					Inline: true,
