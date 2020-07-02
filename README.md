@@ -1,2 +1,5 @@
-# robo-biba
+# РобоБиба
+
 Discord bot
+
+WIP
