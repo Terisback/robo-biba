@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/Terisback/robo-biba/handlers"
+	"github.com/Terisback/robo-biba/commands"
 	"github.com/Terisback/robo-biba/middleware"
 	"github.com/andersfylling/disgord"
 )
@@ -28,13 +28,13 @@ func main() {
 		mdl.FilterBotMessages,
 		mdl.FilterPrefix(prefix),
 		mdl.FilterAliases("o", "online", "о", "онлайн"),
-		handlers.Online)
+		commands.Online)
 
 	dg.On(disgord.EvtMessageCreate,
 		mdl.FilterBotMessages,
 		mdl.FilterPrefix(prefix),
 		mdl.FilterAliases("w", "when", "к", "когда"),
-		handlers.When)
+		commands.When)
 
 	log.Println("Bot is started!")
 }

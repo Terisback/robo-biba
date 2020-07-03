@@ -3,7 +3,7 @@ package middleware
 import (
 	"context"
 
-	"github.com/Terisback/robo-biba/command"
+	"github.com/Terisback/robo-biba/utils"
 	"github.com/andersfylling/disgord"
 )
 
@@ -13,7 +13,7 @@ func (h *Holder) FilterPrefix(prefix string) func(evt interface{}) interface{} {
 		if e, ok := evt.(*disgord.MessageCreate); ok {
 			content := e.Message.Content
 
-			args, ok := command.Parse(h.self.ID.String(), prefix, content)
+			args, ok := utils.Parse(h.self.ID.String(), prefix, content)
 			if ok {
 				e.Ctx = context.WithValue(e.Ctx, "args", args)
 				return evt

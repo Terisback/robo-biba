@@ -1,11 +1,11 @@
-package handlers
+package commands
 
 import (
 	"context"
 	"errors"
 	"log"
 
-	"github.com/Terisback/robo-biba/command"
+	"github.com/Terisback/robo-biba/utils"
 	"github.com/andersfylling/disgord"
 )
 
@@ -29,7 +29,7 @@ func When(s disgord.Session, e *disgord.MessageCreate) {
 	}
 	mentions = mentions[:n]
 
-	args, err := command.GetArgsFromContext(e.Ctx)
+	args, err := utils.GetArgsFromContext(e.Ctx)
 	if err != nil {
 		log.Println(err)
 		return
@@ -50,7 +50,7 @@ func When(s disgord.Session, e *disgord.MessageCreate) {
 	}
 
 	// Return created date from Author ID
-	if command.Aliases(args[1], "я", "мой", "me", "my") {
+	if utils.Aliases(args[1], "я", "мой", "me", "my") {
 		userCreatedDate := e.Message.Author.ID.Date()
 		_, err := e.Message.Reply(context.Background(), s,
 			disgord.Message{
@@ -69,7 +69,7 @@ func When(s disgord.Session, e *disgord.MessageCreate) {
 	}
 
 	// Return created date from first mention ID
-	if command.Aliases(args[1], "создан", "зарегался", "registered", "reg", "created") {
+	if utils.Aliases(args[1], "создан", "зарегался", "registered", "reg", "created") {
 		userCreatedDate := mentions[0].ID.Date()
 		_, err := e.Message.Reply(context.Background(), s,
 			disgord.Message{
@@ -82,7 +82,7 @@ func When(s disgord.Session, e *disgord.MessageCreate) {
 		}
 	}
 
-	if command.Aliases(args[1], "зашёл", "зашел", "присоединился", "joined", "join") {
+	if utils.Aliases(args[1], "зашёл", "зашел", "присоединился", "joined", "join") {
 		member, err := s.GetMember(context.Background(), e.Message.GuildID, mentions[0].ID)
 		if err != nil {
 			log.Println(err)

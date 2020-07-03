@@ -1,11 +1,11 @@
-package handlers
+package commands
 
 import (
 	"context"
 	"log"
 	"strconv"
 
-	"github.com/Terisback/robo-biba/command"
+	"github.com/Terisback/robo-biba/utils"
 	"github.com/andersfylling/disgord"
 )
 
@@ -14,7 +14,7 @@ const roleOfActivePeople = 665980888869371955
 func Online(s disgord.Session, e *disgord.MessageCreate) {
 	var roleID uint64
 
-	args, err := command.GetArgsFromContext(e.Ctx)
+	args, err := utils.GetArgsFromContext(e.Ctx)
 	if err != nil {
 		log.Println(err)
 		return
