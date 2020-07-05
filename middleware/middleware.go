@@ -7,19 +7,19 @@ import (
 	"github.com/andersfylling/disgord"
 )
 
-type Holder struct {
+type Middleware struct {
 	session disgord.Session
 	self    *disgord.User
 }
 
-// Create new middleware holder
-func New(s disgord.Session) (*Holder, error) {
+// Create new Middleware
+func New(session disgord.Session) (*Middleware, error) {
 	var (
 		user *disgord.User
 		err  error
 	)
-	if user, err = s.GetCurrentUser(context.Background()); err != nil {
+	if user, err = session.GetCurrentUser(context.Background()); err != nil {
 		return nil, errors.New("Unable to fetch info about the bot instance")
 	}
-	return &Holder{session: s, self: user}, nil
+	return &Middleware{session: session, self: user}, nil
 }

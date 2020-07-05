@@ -3,6 +3,7 @@ package utils
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 )
 
@@ -10,38 +11,53 @@ import (
 // First element always command itself
 type Arguments []string
 
-// Parse determines if the normalized command has a normalized prefix; in this case returns the normalized arguments of the command
-func Parse(selfID, prefix, content string) (arg Arguments, ok bool) {
-	// Prepare for next step
+type ArgumentsKey string
+
+const (
+	ArgumentsContextKey ArgumentsKey = "args"
+)
+
+func ParseArguments(content, selfID string, prefixes ...string) (args Arguments, ok bool) {
+	// Normalize
 	content = strings.ToLower(content)
 	content = strings.TrimLeft(content, " ")
-	prefix = strings.ToLower(prefix)
+	selfMention := fmt.Sprintf(`<@%s>`, selfID)
 
 	// Find the prefixes and trim them
-	// TODO: Make it with regex
-	if strings.HasPrefix(content, prefix) {
+	if prefix, ok := hasOneOfThePrefixes(content, prefixes...); ok {
 		// Usual prefix
 		content = strings.TrimPrefix(content, prefix)
-	} else if strings.HasPrefix(content, "<@"+selfID+">") {
+	} else if strings.HasPrefix(content, selfMention) {
 		// Mention prefix
-		content = strings.TrimPrefix(content, "<@"+selfID+">")
+		content = strings.TrimPrefix(content, selfMention)
 	} else {
-		ok = false
-		return
+		return nil, false
 	}
 
 	// Returning command arguments
-	arg = strings.Fields(content)
-	ok = true
+	args, ok = strings.Fields(content), true
 	return
 }
 
-// Allows you to get arguments from context after FilterPrefix middleware
-func GetArgsFromContext(ctx context.Context) (Arguments, error) {
-	args := ctx.Value("args").(Arguments)
+func hasOneOfThePrefixes(content string, prefixes ...string) (prefix string, ok bool) {
+	for _, prefix = range prefixes {
+		prefix = strings.ToLower(prefix)
+		prefix = strings.TrimSpace(prefix)
+		if ok = strings.HasPrefix(content, prefix); ok {
+			return
+		}
+	}
 
-	if args == nil || len(args) == 0 {
-		return nil, errors.New("Args is nil or zero length")
+	return "", false
+}
+
+// Allows you to get arguments from context after FilterCommand
+// Return's nil args if it's zero-length
+func GetArgsFromContext(ctx context.Context) (Arguments, error) {
+	args := ctx.Value(ArgumentsContextKey).(Arguments)
+
+	if args == nil {
+		return nil, errors.New("Arguments from context is nil")
 	}
 
 	return args, nil

@@ -26,14 +26,18 @@ func main() {
 
 	dg.On(disgord.EvtMessageCreate,
 		mdl.FilterBotMessages,
-		mdl.FilterPrefix(prefix),
-		mdl.FilterAliases("o", "online", "о", "онлайн"),
+		mdl.FilterCommand(middleware.CommandOptions{
+			Prefixes: []string{prefix},
+			Aliases:  []string{"o", "online", "о", "онлайн"},
+		}),
 		commands.Online)
 
 	dg.On(disgord.EvtMessageCreate,
 		mdl.FilterBotMessages,
-		mdl.FilterPrefix(prefix),
-		mdl.FilterAliases("w", "when", "к", "когда"),
+		mdl.FilterCommand(middleware.CommandOptions{
+			Prefixes: []string{prefix},
+			Aliases:  []string{"w", "when", "к", "когда"},
+		}),
 		commands.When)
 
 	log.Println("Bot is started!")
