@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/Terisback/robo-biba/middleware"
 	"github.com/Terisback/robo-biba/utils"
 	"github.com/andersfylling/disgord"
 )
@@ -12,7 +13,7 @@ func When(session disgord.Session, event *disgord.MessageCreate) {
 	var member *disgord.Member
 	var mentionedID uint64
 	var thereIsMention bool
-	args, err := utils.GetArgsFromContext(event.Ctx)
+	args, err := middleware.GetArgsFromContext(event.Ctx)
 	if err != nil {
 		log.Println(err)
 		return

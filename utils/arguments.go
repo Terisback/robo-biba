@@ -1,8 +1,6 @@
 package utils
 
 import (
-	"context"
-	"errors"
 	"fmt"
 	"strings"
 )
@@ -49,16 +47,4 @@ func hasOneOfThePrefixes(content string, prefixes ...string) (prefix string, ok 
 	}
 
 	return "", false
-}
-
-// Allows you to get arguments from context after FilterCommand
-// Return's nil args if it's zero-length
-func GetArgsFromContext(ctx context.Context) (Arguments, error) {
-	args := ctx.Value(ArgumentsContextKey).(Arguments)
-
-	if args == nil {
-		return nil, errors.New("Arguments from context is nil")
-	}
-
-	return args, nil
 }

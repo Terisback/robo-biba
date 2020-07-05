@@ -5,6 +5,7 @@ import (
 	"log"
 	"strconv"
 
+	"github.com/Terisback/robo-biba/middleware"
 	"github.com/Terisback/robo-biba/utils"
 	"github.com/andersfylling/disgord"
 )
@@ -12,7 +13,7 @@ import (
 const roleOfActivePeople = 665980888869371955
 
 func Online(session disgord.Session, event *disgord.MessageCreate) {
-	args, err := utils.GetArgsFromContext(event.Ctx)
+	args, err := middleware.GetArgsFromContext(event.Ctx)
 	if err != nil {
 		log.Println(err)
 		return
@@ -20,76 +21,73 @@ func Online(session disgord.Session, event *disgord.MessageCreate) {
 
 	// Role ID for monitor online of the role into second column
 	var roleID uint64
+	var ok bool
+	var embeds []*disgord.EmbedField
+	var roleField bool
 
 	if len(args) == 2 {
-		roleID, err = strconv.ParseUint(args[1], 10, 64)
-		if err != nil {
-			log.Println(err)
+		roleID, ok = utils.GetIDFromArg(args[1])
+		if !ok {
 			roleID = roleOfActivePeople
 		}
-	} else {
-		roleID = roleOfActivePeople
 	}
 
-	g, err := session.GetGuild(context.Background(), event.Message.GuildID)
+	guild, err := session.GetGuild(context.Background(), event.Message.GuildID)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	doSecondColumn := true
-
-	role, err := g.Role(disgord.NewSnowflake(roleID))
+	role, err := guild.Role(disgord.NewSnowflake(roleID))
 	if err != nil {
-		doSecondColumn = false
+		roleField = false
 	}
 
-	activeOnline := 0
-	online := 0
-	for _, presence := range g.Presences {
+	everyoneOnline := 0
+	roleOnline := 0
+	for _, presence := range guild.Presences {
 		if presence.Status != "offline" {
-			online += 1
+			everyoneOnline += 1
 
-			u, err := g.Member(presence.User.ID)
-			if err != nil {
-				log.Println(err)
-				return
-			}
+			if roleField {
+				u, err := guild.Member(presence.User.ID)
+				if err != nil {
+					log.Println(err)
+					return
+				}
 
-			if doSecondColumn {
 				for _, r := range u.Roles {
 					if r == role.ID {
-						activeOnline += 1
+						roleOnline += 1
 					}
 				}
 			}
 		}
 	}
 
-	allActive := 0
-	if doSecondColumn {
-		for _, member := range g.Members {
+	everyoneCount := guild.MemberCount
+	roleCount := 0
+	if roleField {
+		for _, member := range guild.Members {
 			for _, r := range member.Roles {
 				if r == role.ID {
-					allActive += 1
+					roleCount += 1
 				}
 			}
 		}
 	}
 
-	var embeds []*disgord.EmbedField
-
 	embeds = append(embeds, &disgord.EmbedField{
 		Name:   "Общак",
-		Value:  "Всего: " + strconv.Itoa(int(g.MemberCount)) + "\n" + "Онлайн: " + strconv.Itoa(online),
+		Value:  "Всего: " + strconv.Itoa(int(everyoneCount)) + "\n" + "Онлайн: " + strconv.Itoa(everyoneOnline),
 		Inline: true,
 	},
 	)
 
-	if doSecondColumn {
+	if roleField {
 		embeds = append(embeds, &disgord.EmbedField{
 			Name:   role.Name,
-			Value:  "Всего: " + strconv.Itoa(allActive) + "\n" + "Онлайн: " + strconv.Itoa(activeOnline),
+			Value:  "Всего: " + strconv.Itoa(roleCount) + "\n" + "Онлайн: " + strconv.Itoa(roleOnline),
 			Inline: true,
 		},
 		)
@@ -97,7 +95,7 @@ func Online(session disgord.Session, event *disgord.MessageCreate) {
 
 	_, err = event.Message.Reply(context.Background(), session,
 		disgord.Embed{
-			Title:  "Онлайн " + g.Name,
+			Title:  "Онлайн " + guild.Name,
 			Fields: embeds,
 		},
 	)
