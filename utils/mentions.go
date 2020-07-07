@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"strconv"
 
 	"github.com/andersfylling/disgord"
@@ -33,4 +34,19 @@ func GetIDFromArg(arg string) (id uint64, ok bool) {
 	}
 
 	return 0, false
+}
+
+func GetIDFromArgAndCheckIt(s disgord.Session, guildID disgord.Snowflake, arg string) (id uint64, ok bool) {
+	id, ok = GetIDFromArg(arg)
+	if !ok {
+		return
+	}
+
+	// Checking if member exist in guild
+	_, err := s.GetMember(context.Background(), guildID, disgord.NewSnowflake(id))
+	if err != nil {
+		return id, false
+	}
+
+	return id, true
 }

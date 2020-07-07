@@ -37,7 +37,7 @@ func When(session disgord.Session, event *disgord.MessageCreate) {
 		return
 	}
 
-	if mentionedID, thereIsMention = utils.GetIDFromArg(args[1]); thereIsMention {
+	if mentionedID, thereIsMention = utils.GetIDFromArgAndCheckIt(session, event.Message.GuildID, args[1]); thereIsMention {
 		member, err = session.GetMember(context.Background(), event.Message.GuildID, disgord.NewSnowflake(mentionedID))
 		if err != nil {
 			log.Println(err)
@@ -77,7 +77,7 @@ func When(session disgord.Session, event *disgord.MessageCreate) {
 		return
 	}
 
-	if mentionedID, thereIsMention = utils.GetIDFromArg(args[2]); thereIsMention {
+	if mentionedID, thereIsMention = utils.GetIDFromArgAndCheckIt(session, event.Message.GuildID, args[2]); thereIsMention {
 		member, err = session.GetMember(context.Background(), event.Message.GuildID, disgord.NewSnowflake(mentionedID))
 		if err != nil {
 			log.Println(err)

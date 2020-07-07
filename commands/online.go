@@ -26,7 +26,7 @@ func Online(session disgord.Session, event *disgord.MessageCreate) {
 	var roleField bool
 
 	if len(args) == 2 {
-		roleID, ok = utils.GetIDFromArg(args[1])
+		roleID, ok = utils.GetIDFromArgAndCheckIt(session, event.Message.GuildID, args[1])
 		if !ok {
 			roleID = roleOfActivePeople
 		}
