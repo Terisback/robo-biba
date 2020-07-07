@@ -9,10 +9,6 @@ import (
 	"github.com/andersfylling/disgord"
 )
 
-const (
-	prefix = "!"
-)
-
 func main() {
 	dg := disgord.New(disgord.Config{
 		BotToken: config.Token,
@@ -27,7 +23,7 @@ func main() {
 	dg.On(disgord.EvtMessageCreate,
 		mdl.FilterBotMessages,
 		mdl.FilterCommand(middleware.CommandOptions{
-			Prefixes: []string{prefix},
+			Prefixes: []string{config.Prefix},
 			Aliases:  []string{"o", "online", "о", "онлайн"},
 		}),
 		commands.Online)
@@ -35,7 +31,7 @@ func main() {
 	dg.On(disgord.EvtMessageCreate,
 		mdl.FilterBotMessages,
 		mdl.FilterCommand(middleware.CommandOptions{
-			Prefixes: []string{prefix},
+			Prefixes: []string{config.Prefix},
 			Aliases:  []string{"w", "when", "к", "когда"},
 		}),
 		commands.When)

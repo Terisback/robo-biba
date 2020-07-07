@@ -7,7 +7,8 @@ import (
 )
 
 type Config struct {
-	Token string `env:"TOKEN" required:"true"`
+	Token  string `env:"TOKEN" required:"true"`
+	Prefix string `env:"BOT_PREFIX" default:"!"`
 }
 
 var (
