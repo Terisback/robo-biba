@@ -6,27 +6,27 @@ import (
 	"strconv"
 
 	"github.com/Terisback/robo-biba/middleware"
-	"github.com/Terisback/robo-biba/utils"
 	"github.com/andersfylling/disgord"
 )
 
 const roleOfActivePeople = 665980888869371955
 
 func Online(session disgord.Session, event *disgord.MessageCreate) {
-	args, err := middleware.GetArgsFromContext(event.Ctx)
+	command, err := middleware.GetCommandFromContext(event.Ctx)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	// Role ID for monitor online of the role into second column
-	var roleID uint64
-	var ok bool
-	var embeds []*disgord.EmbedField
-	var roleField bool
+	var (
+		args      = command.Arguments
+		roleID    uint64
+		ok        bool
+		roleField bool
+	)
 
 	if len(args) == 2 {
-		roleID, ok = utils.GetIDFromArgAndCheckIt(session, event.Message.GuildID, args[1])
+		roleID, ok = args[1].GetID()
 		if !ok {
 			roleID = roleOfActivePeople
 		}
@@ -76,6 +76,8 @@ func Online(session disgord.Session, event *disgord.MessageCreate) {
 			}
 		}
 	}
+
+	var embeds []*disgord.EmbedField
 
 	embeds = append(embeds, &disgord.EmbedField{
 		Name:   "Общак",

@@ -24,6 +24,13 @@ func main() {
 		mdl.FilterBotMessages,
 		mdl.FilterCommand(middleware.CommandOptions{
 			Prefixes: []string{config.Prefix},
+			Aliases:  []string{"h", "help", "х", "помощь", "помошь", "помощ", "помоги", "хуй", "хуила", "памаги", "вишнялох", "бля", "блячеделать", "хелп"},
+		}),
+		commands.Help)
+	dg.On(disgord.EvtMessageCreate,
+		mdl.FilterBotMessages,
+		mdl.FilterCommand(middleware.CommandOptions{
+			Prefixes: []string{config.Prefix},
 			Aliases:  []string{"o", "online", "о", "онлайн"},
 		}),
 		commands.Online)

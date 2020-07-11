@@ -2,9 +2,14 @@ package utils
 
 import (
 	"context"
+	"regexp"
 	"strconv"
 
 	"github.com/andersfylling/disgord"
+)
+
+var (
+	userIDRegex = regexp.MustCompile(`\d{18}`)
 )
 
 // Returns mentions slice without user with id
@@ -24,8 +29,8 @@ func GetMentionWithoutID(mentions []*disgord.User, id disgord.Snowflake) []*disg
 func GetIDFromArg(arg string) (id uint64, ok bool) {
 	var err error
 
-	if UserIDRegex.MatchString(arg) {
-		userID := UserIDRegex.FindString(arg)
+	if userIDRegex.MatchString(arg) {
+		userID := userIDRegex.FindString(arg)
 		id, err = strconv.ParseUint(userID, 10, 64)
 		if err != nil {
 			return 0, false
@@ -36,17 +41,19 @@ func GetIDFromArg(arg string) (id uint64, ok bool) {
 	return 0, false
 }
 
-func GetIDFromArgAndCheckIt(s disgord.Session, guildID disgord.Snowflake, arg string) (id uint64, ok bool) {
+func GetMemberFromArg(s disgord.Session, guildID disgord.Snowflake, arg string) (member *disgord.Member, ok bool) {
+	var id uint64
 	id, ok = GetIDFromArg(arg)
 	if !ok {
 		return
 	}
 
+	var err error
 	// Checking if member exist in guild
-	_, err := s.GetMember(context.Background(), guildID, disgord.NewSnowflake(id))
+	member, err = s.GetMember(context.Background(), guildID, disgord.NewSnowflake(id))
 	if err != nil {
-		return id, false
+		return &disgord.Member{}, false
 	}
 
-	return id, true
+	return member, true
 }
