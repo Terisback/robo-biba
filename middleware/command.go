@@ -94,12 +94,16 @@ func command(content, selfID string, options CommandOptions) (command Command, e
 		return command, errors.New("There is no any of the prefixes")
 	}
 
-	if ok := utils.Aliases(content, options.Aliases...); !ok {
-		return command, errors.New("There is no any of the aliases")
-	}
-
 	// Command fields
 	fields := strings.Fields(content)
+
+	if len(fields) == 0 {
+		return command, errors.New("There is no arguments")
+	}
+
+	if ok := utils.Aliases(fields[0], options.Aliases...); !ok {
+		return command, errors.New("There is no any of the aliases")
+	}
 
 	for _, f := range fields {
 		arg := Argument{}

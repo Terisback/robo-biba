@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/Terisback/robo-biba/commands"
+	"github.com/Terisback/robo-biba/economy"
 	"github.com/Terisback/robo-biba/middleware"
 	"github.com/andersfylling/disgord"
 )
@@ -13,7 +14,11 @@ func main() {
 	dg := disgord.New(disgord.Config{
 		BotToken: config.Token,
 	})
-	defer dg.StayConnectedUntilInterrupted(context.Background())
+	defer func() {
+		dg.StayConnectedUntilInterrupted(context.Background())
+		commands.GiftCacheSave()
+		economy.Close()
+	}()
 
 	mdl, err := middleware.New(dg)
 	if err != nil {
@@ -24,9 +29,10 @@ func main() {
 		mdl.FilterBotMessages,
 		mdl.FilterCommand(middleware.CommandOptions{
 			Prefixes: []string{config.Prefix},
-			Aliases:  []string{"h", "help", "х", "помощь", "помошь", "помощ", "помоги", "хуй", "хуила", "памаги", "вишнялох", "бля", "блячеделать", "хелп"},
+			Aliases:  []string{"h", "help", "х", "помощь", "хелп"},
 		}),
 		commands.Help)
+
 	dg.On(disgord.EvtMessageCreate,
 		mdl.FilterBotMessages,
 		mdl.FilterCommand(middleware.CommandOptions{
@@ -42,6 +48,30 @@ func main() {
 			Aliases:  []string{"w", "when", "к", "когда"},
 		}),
 		commands.When)
+
+	dg.On(disgord.EvtMessageCreate,
+		mdl.FilterBotMessages,
+		mdl.FilterCommand(middleware.CommandOptions{
+			Prefixes: []string{config.Prefix},
+			Aliases:  []string{"b", "balance", "б", "баланс"},
+		}),
+		commands.Balance)
+
+	dg.On(disgord.EvtMessageCreate,
+		mdl.FilterBotMessages,
+		mdl.FilterCommand(middleware.CommandOptions{
+			Prefixes: []string{config.Prefix},
+			Aliases:  []string{"g", "gift", "г", "п", "подарок"},
+		}),
+		commands.Gift)
+
+	dg.On(disgord.EvtMessageCreate,
+		mdl.FilterBotMessages,
+		mdl.FilterCommand(middleware.CommandOptions{
+			Prefixes: []string{config.Prefix},
+			Aliases:  []string{"f", "flip", "ф", "флип"},
+		}),
+		commands.Coinflip)
 
 	log.Println("Bot is started!")
 }
