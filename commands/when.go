@@ -62,8 +62,8 @@ func When(session disgord.Session, event *disgord.MessageCreate) {
 		_, err = event.Message.Reply(context.Background(), session, &embed)
 		if err != nil {
 			log.Println(err)
-			return
 		}
+		return
 	}
 
 	// Return created date from Author ID

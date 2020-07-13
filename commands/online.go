@@ -22,7 +22,7 @@ func Online(session disgord.Session, event *disgord.MessageCreate) {
 		args      = command.Arguments
 		roleID    uint64
 		ok        bool
-		roleField bool
+		roleField bool = true
 	)
 
 	if len(args) == 2 {
@@ -30,6 +30,8 @@ func Online(session disgord.Session, event *disgord.MessageCreate) {
 		if !ok {
 			roleID = roleOfActivePeople
 		}
+	} else {
+		roleID = roleOfActivePeople
 	}
 
 	guild, err := session.GetGuild(context.Background(), event.Message.GuildID)
@@ -91,8 +93,7 @@ func Online(session disgord.Session, event *disgord.MessageCreate) {
 			Name:   role.Name,
 			Value:  "Всего: " + strconv.Itoa(roleCount) + "\n" + "Онлайн: " + strconv.Itoa(roleOnline),
 			Inline: true,
-		},
-		)
+		})
 	}
 
 	_, err = event.Message.Reply(context.Background(), session,
