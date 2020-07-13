@@ -1,24 +1,18 @@
 package commands
 
 import (
-	"bytes"
 	"context"
-	"encoding/gob"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"math/rand"
-	"os"
 	"strconv"
 	"time"
 
-	"github.com/Terisback/robo-biba/economy"
+	"github.com/Terisback/robo-biba/internal/storage"
 	"github.com/andersfylling/disgord"
-	"github.com/patrickmn/go-cache"
 )
 
 const (
-	giftCacheFilename        = "giftCache.dat"
 	giftAlreadyGiftedMessage = "%s вы уже получили подарок!"
 	giftNewGift              = "%s поздравляю вы получили %d монет!"
 	giftAlreadyDesc          = "До следующего подарка осталось %s\n__Баланс:__ **%d** <:rgd_coin_rgd:518875768814829568>"
@@ -26,74 +20,8 @@ const (
 )
 
 var (
-	giftCache = cache.New(time.Hour*2, time.Minute*5)
-	giftRand  = rand.New(rand.NewSource(time.Now().UnixNano()))
+	giftRand = rand.New(rand.NewSource(time.Now().UnixNano()))
 )
-
-func loadCache() {
-	data, err := ioutil.ReadFile(giftCacheFilename)
-	if err != nil {
-		log.Fatalln(err)
-		return
-	}
-
-	var rw bytes.Buffer
-	dec := gob.NewDecoder(&rw)
-
-	_, err = rw.Write(data)
-	if err != nil {
-		log.Fatalln(err)
-		return
-	}
-
-	items := make(map[string]cache.Item)
-	err = dec.Decode(&items)
-	if err != nil {
-		log.Fatalln(err)
-		return
-	}
-
-	giftCache = cache.NewFrom(time.Hour*2, time.Minute*1, items)
-}
-
-func saveCache() {
-	items := giftCache.Items()
-
-	var rw bytes.Buffer
-	enc := gob.NewEncoder(&rw)
-
-	err := enc.Encode(items)
-	if err != nil {
-		log.Fatalln(err)
-		return
-	}
-
-	data, err := ioutil.ReadAll(&rw)
-	if err != nil {
-		log.Fatalln(err)
-		return
-	}
-
-	err = ioutil.WriteFile(giftCacheFilename, data, 0664)
-	if err != nil {
-		log.Fatalln(err)
-		return
-	}
-}
-
-func init() {
-	gob.Register(cache.Item{})
-
-	if _, err := os.Stat("./" + giftCacheFilename); err == nil {
-		loadCache()
-	} else {
-		saveCache()
-	}
-}
-
-func GiftCacheSave() {
-	saveCache()
-}
 
 func Gift(session disgord.Session, event *disgord.MessageCreate) {
 	guildID := event.Message.GuildID.String()
@@ -110,14 +38,20 @@ func Gift(session disgord.Session, event *disgord.MessageCreate) {
 		return
 	}
 
+	gained, expiration, err := storage.GiftStatus(guildID, userID)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
 	embed := disgord.Embed{}
 
-	if _, expiration, exists := giftCache.GetWithExpiration(guildID + userID); exists {
+	if gained {
 		d := expiration.UTC().Sub(time.Now().UTC())
 
 		since := durString(d)
 
-		balance, err := economy.Balance(event.Message.GuildID.String(), event.Message.Author.ID.String())
+		balance, err := storage.Balance(event.Message.GuildID.String(), event.Message.Author.ID.String())
 		if err != nil {
 			return
 		}
@@ -126,12 +60,12 @@ func Gift(session disgord.Session, event *disgord.MessageCreate) {
 		embed.Description = fmt.Sprintf(giftAlreadyDesc, since, balance)
 	} else {
 		sum := 10 + giftRand.Intn(40)
-		balance, err := economy.Add(event.Message.GuildID.String(), event.Message.Author.ID.String(), sum)
+		balance, err := storage.AddCurrency(event.Message.GuildID.String(), event.Message.Author.ID.String(), sum)
 		if err != nil {
 			return
 		}
 
-		giftCache.SetDefault(guildID+userID, true)
+		storage.AddGiftBound(guildID, userID, time.Now().Add(time.Hour*2))
 
 		embed.Author = &disgord.EmbedAuthor{IconURL: avatarURL, Name: fmt.Sprintf(giftNewGift, nickname, sum)}
 		embed.Description = fmt.Sprintf(giftDesc, balance)

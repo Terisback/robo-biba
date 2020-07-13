@@ -6,7 +6,7 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/Terisback/robo-biba/economy"
+	"github.com/Terisback/robo-biba/internal/storage"
 	"github.com/Terisback/robo-biba/middleware"
 	"github.com/Terisback/robo-biba/utils"
 	"github.com/andersfylling/disgord"
@@ -48,7 +48,7 @@ func Coinflip(session disgord.Session, event *disgord.MessageCreate) {
 		guildID := event.Message.GuildID.String()
 		userID := event.Message.Author.ID.String()
 
-		balance, err := economy.Balance(guildID, userID)
+		balance, err := storage.Balance(guildID, userID)
 		if err != nil {
 			_, err := session.SendMsg(context.Background(), event.Message.ChannelID, "Something went wrong...")
 			if err != nil {
@@ -105,7 +105,7 @@ func Coinflip(session disgord.Session, event *disgord.MessageCreate) {
 		var newMessage string
 
 		if win {
-			balance, err = economy.Add(guildID, userID, bet)
+			balance, err = storage.AddCurrency(guildID, userID, bet)
 			if err != nil {
 				log.Println("Economy go brrrrrr")
 				return
@@ -114,7 +114,7 @@ func Coinflip(session disgord.Session, event *disgord.MessageCreate) {
 			newCoin = cfWinCoin
 			newMessage = "ПОБЕДА!"
 		} else {
-			balance, err = economy.Add(guildID, userID, -bet)
+			balance, err = storage.AddCurrency(guildID, userID, -bet)
 			if err != nil {
 				log.Println("Economy go brrrrrr")
 				return

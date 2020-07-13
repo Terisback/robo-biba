@@ -23,9 +23,7 @@ func When(session disgord.Session, event *disgord.MessageCreate) {
 	if len(args) == 1 {
 		serverCreatedDate := event.Message.GuildID.Date()
 		_, err := event.Message.Reply(context.Background(), session,
-			disgord.Message{
-				Content: serverCreatedDate.Format("Сервер был создан 02.01.2006 в 15:04:05 по Москве"),
-			},
+			serverCreatedDate.Format("Сервер был создан 02.01.2006 в 15:04:05 по Москве"),
 		)
 		if err != nil {
 			log.Println(err)
@@ -38,14 +36,33 @@ func When(session disgord.Session, event *disgord.MessageCreate) {
 		return
 	}
 
-	member, thereIsMention = utils.GetMemberFromArg(session, event.Message.GuildID, args[1].String())
+	var nickname string
+	thereIsMention = false
+
+	member, err = session.GetMember(context.Background(), event.Message.GuildID, event.Message.Author.ID)
+	if err != nil {
+		return
+	}
+	nickname = member.Nick
+
+	if nickname == "" {
+		nickname = member.User.Username
+	}
+
+	if _, ok := args[1].GetID(); ok {
+		member, thereIsMention = utils.GetMemberFromArg(session, event.Message.GuildID, args[1].String())
+
+		nickname = member.Nick
+
+		if nickname == "" {
+			nickname = member.User.Username
+		}
+	}
 
 	if thereIsMention {
 		userCreatedDate := member.JoinedAt.Time
 		_, err = event.Message.Reply(context.Background(), session,
-			disgord.Message{
-				Content: "**" + member.User.Username + userCreatedDate.Format("** зашёл на сервер 02.01.2006 в 15:04:05 по Москве"),
-			},
+			"**"+nickname+userCreatedDate.Format("** зашёл на сервер 02.01.2006 в 15:04:05 по Москве"),
 		)
 		if err != nil {
 			log.Println(err)
@@ -57,9 +74,7 @@ func When(session disgord.Session, event *disgord.MessageCreate) {
 	if utils.Aliases(args[1].String(), "я", "мой", "me", "my") {
 		userCreatedDate := event.Message.Author.ID.Date()
 		_, err := event.Message.Reply(context.Background(), session,
-			disgord.Message{
-				Content: "**" + event.Message.Author.Username + userCreatedDate.Format("** был создан 02.01.2006 в 15:04:05 по Москве"),
-			},
+			"**"+nickname+userCreatedDate.Format("** был создан 02.01.2006 в 15:04:05 по Москве"),
 		)
 		if err != nil {
 			log.Println(err)
@@ -72,14 +87,22 @@ func When(session disgord.Session, event *disgord.MessageCreate) {
 		return
 	}
 
-	member, thereIsMention = utils.GetMemberFromArg(session, event.Message.GuildID, args[2].String())
+	thereIsMention = false
+
+	if _, ok := args[2].GetID(); ok {
+		member, thereIsMention = utils.GetMemberFromArg(session, event.Message.GuildID, args[2].String())
+
+		nickname = member.Nick
+
+		if nickname == "" {
+			nickname = member.User.Username
+		}
+	}
 
 	if thereIsMention && utils.Aliases(args[1].String(), "создан", "зарегался", "registered", "reg", "created") {
 		userCreatedDate := member.User.ID.Date()
 		_, err := event.Message.Reply(context.Background(), session,
-			disgord.Message{
-				Content: "**" + member.User.Username + userCreatedDate.Format("** был создан 02.01.2006 в 15:04:05 по Москве"),
-			},
+			"**"+nickname+userCreatedDate.Format("** был создан 02.01.2006 в 15:04:05 по Москве"),
 		)
 		if err != nil {
 			log.Println(err)
@@ -90,9 +113,7 @@ func When(session disgord.Session, event *disgord.MessageCreate) {
 	if thereIsMention && utils.Aliases(args[1].String(), "зашёл", "зашел", "присоединился", "joined", "join") {
 		userCreatedDate := member.JoinedAt.Time
 		_, err = event.Message.Reply(context.Background(), session,
-			disgord.Message{
-				Content: "**" + member.User.Username + userCreatedDate.Format("** зашёл на сервер 02.01.2006 в 15:04:05 по Москве"),
-			},
+			"**"+nickname+userCreatedDate.Format("** зашёл на сервер 02.01.2006 в 15:04:05 по Москве"),
 		)
 		if err != nil {
 			log.Println(err)

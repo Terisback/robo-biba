@@ -5,19 +5,19 @@ import (
 	"log"
 
 	"github.com/Terisback/robo-biba/commands"
-	"github.com/Terisback/robo-biba/economy"
+	"github.com/Terisback/robo-biba/internal/storage"
 	"github.com/Terisback/robo-biba/middleware"
 	"github.com/andersfylling/disgord"
 )
 
 func main() {
+	storage.Init(config.MongoDB)
 	dg := disgord.New(disgord.Config{
 		BotToken: config.Token,
 	})
 	defer func() {
 		dg.StayConnectedUntilInterrupted(context.Background())
-		commands.GiftCacheSave()
-		economy.Close()
+		storage.Close()
 	}()
 
 	mdl, err := middleware.New(dg)
