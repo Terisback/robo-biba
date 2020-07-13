@@ -55,10 +55,12 @@ func AddCurrency(guildID, userID string, amount int) (balance int, err error) {
 			return 0, err
 		}
 
+		newBalance := balance + amount
+
 		var rw bytes.Buffer
 		enc := gob.NewEncoder(&rw)
 
-		err = enc.Encode(amount)
+		err = enc.Encode(newBalance)
 		if err != nil {
 			return 0, err
 		}
@@ -73,7 +75,7 @@ func AddCurrency(guildID, userID string, amount int) (balance int, err error) {
 			return 0, err
 		}
 
-		return balance + amount, nil
+		return newBalance, nil
 	}
 
 	var rw bytes.Buffer

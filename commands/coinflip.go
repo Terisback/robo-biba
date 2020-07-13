@@ -75,7 +75,7 @@ func Coinflip(session disgord.Session, event *disgord.MessageCreate) {
 		if balance-bet < 0 {
 			embed := disgord.Embed{}
 			embed.Author = &disgord.EmbedAuthor{IconURL: avatarURL, Name: fmt.Sprintf("%s вы не можете играть на сумму превышающую ваш баланс", nickname)}
-			_, err := session.SendMsg(context.Background(), event.Message.ChannelID, &embed)
+			_, err := event.Message.Reply(context.Background(), session, &embed)
 			if err != nil {
 				return
 			}
@@ -114,7 +114,7 @@ func Coinflip(session disgord.Session, event *disgord.MessageCreate) {
 			newCoin = cfWinCoin
 			newMessage = "ПОБЕДА!"
 		} else {
-			balance, err = storage.AddCurrency(guildID, userID, -bet)
+			balance, err = storage.SubCurrency(guildID, userID, bet)
 			if err != nil {
 				log.Println("Economy go brrrrrr")
 				return
