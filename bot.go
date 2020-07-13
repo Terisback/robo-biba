@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	storage.Init(config.MongoDB)
+	storage.Init()
 	dg := disgord.New(disgord.Config{
 		BotToken: config.Token,
 	})
