@@ -3,6 +3,7 @@ package commands
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/Terisback/robo-biba/internal/storage"
 	"github.com/andersfylling/disgord"
@@ -33,5 +34,9 @@ func Balance(session disgord.Session, event *disgord.MessageCreate) {
 	embed.Author = &disgord.EmbedAuthor{IconURL: avatarURL, Name: nickname}
 	embed.Description = fmt.Sprintf(blDesc, balance)
 
-	session.SendMsg(context.Background(), event.Message.ChannelID, &embed)
+	_, err = event.Message.Reply(context.Background(), session, &embed)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 }

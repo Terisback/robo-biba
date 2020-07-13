@@ -21,7 +21,7 @@ func Help(session disgord.Session, event *disgord.MessageCreate) {
 		Description: help,
 	}
 
-	_, err := session.SendMsg(context.Background(), event.Message.ChannelID, embed)
+	_, err := event.Message.Reply(context.Background(), session, &embed)
 	if err != nil {
 		fmt.Println(err)
 	}

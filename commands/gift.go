@@ -65,13 +65,20 @@ func Gift(session disgord.Session, event *disgord.MessageCreate) {
 			return
 		}
 
-		storage.AddGiftBound(guildID, userID, time.Now().Add(time.Hour*2))
+		err = storage.AddGiftBound(guildID, userID, time.Now().Add(time.Hour*2))
+		if err != nil {
+			return
+		}
 
 		embed.Author = &disgord.EmbedAuthor{IconURL: avatarURL, Name: fmt.Sprintf(giftNewGift, nickname, sum)}
 		embed.Description = fmt.Sprintf(giftDesc, balance)
 	}
 
-	session.SendMsg(context.Background(), event.Message.ChannelID, &embed)
+	_, err = event.Message.Reply(context.Background(), session, &embed)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 }
 
 func durString(d time.Duration) (result string) {

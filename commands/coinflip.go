@@ -50,7 +50,7 @@ func Coinflip(session disgord.Session, event *disgord.MessageCreate) {
 
 		balance, err := storage.Balance(guildID, userID)
 		if err != nil {
-			_, err := session.SendMsg(context.Background(), event.Message.ChannelID, "Something went wrong...")
+			_, err := event.Message.Reply(context.Background(), session, "Something went wrong...")
 			if err != nil {
 				return
 			}
@@ -95,7 +95,7 @@ func Coinflip(session disgord.Session, event *disgord.MessageCreate) {
 		embed.Thumbnail = &disgord.EmbedThumbnail{URL: cfNeutralCoin}
 		embed.Color = int(color)
 
-		msg, err := session.SendMsg(context.Background(), event.Message.ChannelID, &embed)
+		msg, err := event.Message.Reply(context.Background(), session, &embed)
 		if err != nil {
 			return
 		}
@@ -140,7 +140,7 @@ func Coinflip(session disgord.Session, event *disgord.MessageCreate) {
 	} else {
 		embed := disgord.Embed{}
 		embed.Description = cfHelp
-		_, err := session.SendMsg(context.Background(), event.Message.ChannelID, &embed)
+		_, err := event.Message.Reply(context.Background(), session, &embed)
 		if err != nil {
 			return
 		}
