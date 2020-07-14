@@ -19,6 +19,7 @@ func Help(session disgord.Session, event *disgord.MessageCreate) {
 	embed := disgord.Embed{
 		Title:       "Список команд",
 		Description: help,
+		Color:       getIntColor(defaultEmbedColor),
 	}
 
 	_, err := event.Message.Reply(context.Background(), session, &embed)

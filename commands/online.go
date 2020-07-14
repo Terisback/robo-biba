@@ -100,6 +100,7 @@ func Online(session disgord.Session, event *disgord.MessageCreate) {
 		disgord.Embed{
 			Title:  "Онлайн " + guild.Name,
 			Fields: embeds,
+			Color:  getIntColor(defaultEmbedColor),
 		},
 	)
 	if err != nil {

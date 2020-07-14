@@ -45,6 +45,7 @@ func Gift(session disgord.Session, event *disgord.MessageCreate) {
 	}
 
 	embed := disgord.Embed{}
+	embed.Color = getIntColor(defaultEmbedColor)
 
 	if gained {
 		d := expiration.UTC().Sub(time.Now().UTC())

@@ -23,6 +23,8 @@ func When(session disgord.Session, event *disgord.MessageCreate) {
 		args     = command.Arguments
 	)
 
+	embed.Color = getIntColor(defaultEmbedColor)
+
 	if len(args) == 1 {
 		nickname = event.Message.Member.Nick
 

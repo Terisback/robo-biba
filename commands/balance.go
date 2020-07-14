@@ -31,6 +31,7 @@ func Balance(session disgord.Session, event *disgord.MessageCreate) {
 	}
 
 	embed := disgord.Embed{}
+	embed.Color = getIntColor(defaultEmbedColor)
 	embed.Author = &disgord.EmbedAuthor{IconURL: avatarURL, Name: nickname}
 	embed.Description = fmt.Sprintf(blDesc, balance)
 

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strconv"
 
 	"github.com/Terisback/robo-biba/internal/storage"
 	"github.com/Terisback/robo-biba/middleware"
@@ -36,6 +35,7 @@ func Coinflip(session disgord.Session, event *disgord.MessageCreate) {
 
 	if len(args) < 2 {
 		embed := disgord.Embed{}
+		embed.Color = getIntColor(defaultEmbedColor)
 		embed.Description = cfHelp
 		_, err := session.SendMsg(context.Background(), event.Message.ChannelID, &embed)
 		if err != nil {
@@ -74,6 +74,7 @@ func Coinflip(session disgord.Session, event *disgord.MessageCreate) {
 
 		if balance-bet < 0 {
 			embed := disgord.Embed{}
+			embed.Color = getIntColor(defaultEmbedColor)
 			embed.Author = &disgord.EmbedAuthor{IconURL: avatarURL, Name: fmt.Sprintf("%s вы не можете играть на сумму превышающую ваш баланс", nickname)}
 			_, err := event.Message.Reply(context.Background(), session, &embed)
 			if err != nil {
@@ -84,16 +85,11 @@ func Coinflip(session disgord.Session, event *disgord.MessageCreate) {
 
 		win := utils.RandBool()
 
-		color, err := strconv.ParseUint(cfNeutralColor, 16, 64)
-		if err != nil {
-			return
-		}
-
 		embed := disgord.Embed{}
 		embed.Author = &disgord.EmbedAuthor{IconURL: avatarURL, Name: fmt.Sprintf("%s подбросил монетку", nickname)}
 		embed.Description = fmt.Sprintf(cfMessage, "ПОДБРАСЫВАЕМ...", bet, balance)
 		embed.Thumbnail = &disgord.EmbedThumbnail{URL: cfNeutralCoin}
-		embed.Color = int(color)
+		embed.Color = getIntColor(defaultEmbedColor)
 
 		msg, err := event.Message.Reply(context.Background(), session, &embed)
 		if err != nil {
@@ -124,14 +120,9 @@ func Coinflip(session disgord.Session, event *disgord.MessageCreate) {
 			newMessage = "ПОРАЖЕНИЕ"
 		}
 
-		color, err = strconv.ParseUint(newColor, 16, 64)
-		if err != nil {
-			return
-		}
-
 		embed.Description = fmt.Sprintf(cfMessage, newMessage, bet, balance)
 		embed.Thumbnail = &disgord.EmbedThumbnail{URL: newCoin}
-		embed.Color = int(color)
+		embed.Color = getIntColor(newColor)
 
 		_, err = session.SetMsgEmbed(context.Background(), msg.ChannelID, msg.ID, &embed)
 		if err != nil {
