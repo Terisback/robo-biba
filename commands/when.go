@@ -10,31 +10,16 @@ import (
 )
 
 func When(session disgord.Session, event *disgord.MessageCreate) {
-	var member *disgord.Member
 	command, err := middleware.GetCommandFromContext(event.Ctx)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	var (
-		embed    = disgord.Embed{}
-		nickname string
-		args     = command.Arguments
-	)
-
-	embed.Color = getIntColor(defaultEmbedColor)
+	args := command.Arguments
 
 	if len(args) == 1 {
-		nickname = event.Message.Member.Nick
-
-		if nickname == "" {
-			nickname = event.Message.Author.Username
-		}
-
-		userJoinedAtDate := event.Message.Member.JoinedAt
-		embed.Description = "**" + nickname + userJoinedAtDate.Format("** зашел на сервер 02.01.2006 в 15:04:05 по Москве")
-		_, err := event.Message.Reply(context.Background(), session, &embed)
+		_, err := event.Message.Reply(context.Background(), session, whenEmbed(event.Message.Member))
 		if err != nil {
 			log.Println(err)
 		}
@@ -42,6 +27,7 @@ func When(session disgord.Session, event *disgord.MessageCreate) {
 	}
 
 	if len(args) < 2 {
+		embed := disgord.Embed{}
 		embed.Description = "`!когда <id или упоминание>` - Узнать когда пользователь зашёл на сервер"
 		_, err := event.Message.Reply(context.Background(), session, &embed)
 		if err != nil {
@@ -51,43 +37,34 @@ func When(session disgord.Session, event *disgord.MessageCreate) {
 	}
 
 	if _, ok := args[1].GetID(); ok {
+		var member *disgord.Member
 		member, _ = utils.GetMemberFromArg(session, event.Message.GuildID, args[1].String())
-
-		nickname = member.Nick
-
-		if nickname == "" {
-			nickname = member.User.Username
-		}
-
-		userJoinedAtDate := member.JoinedAt.Time
-		embed.Description = "**" + nickname + userJoinedAtDate.Format("** зашёл на сервер 02.01.2006 в 15:04:05 по Москве")
-		_, err = event.Message.Reply(context.Background(), session, &embed)
+		_, err = event.Message.Reply(context.Background(), session, whenEmbed(member))
 		if err != nil {
 			log.Println(err)
 		}
 		return
 	}
 
-	// Return created date from Author ID
-	if utils.Aliases(args[1].String(), "я", "мой", "me", "my") {
-		nickname = event.Message.Member.Nick
-
-		if nickname == "" {
-			nickname = event.Message.Author.Username
-		}
-
-		userJoinedAtDate := event.Message.Member.JoinedAt
-		embed.Description = "**" + nickname + userJoinedAtDate.Format("** зашел на сервер 02.01.2006 в 15:04:05 по Москве")
-		_, err := event.Message.Reply(context.Background(), session, &embed)
-		if err != nil {
-			log.Println(err)
-		}
-		return
-	}
-
+	embed := disgord.Embed{}
 	embed.Description = "`!когда <id или упоминание>` - Узнать когда пользователь зашёл на сервер"
 	_, err = event.Message.Reply(context.Background(), session, &embed)
 	if err != nil {
 		log.Println(err)
 	}
+}
+
+func whenEmbed(member *disgord.Member) *disgord.Embed {
+	embed := disgord.Embed{}
+	embed.Color = utils.GetIntColor(utils.DefaultEmbedColor)
+
+	nickname := member.Nick
+
+	if nickname == "" {
+		nickname = member.User.Username
+	}
+
+	userJoinedAtDate := member.JoinedAt.Time
+	embed.Description = "**" + nickname + userJoinedAtDate.Format("** зашёл на сервер 02.01.2006 в 15:04:05 по Москве")
+	return &embed
 }

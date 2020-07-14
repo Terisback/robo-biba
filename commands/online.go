@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/Terisback/robo-biba/middleware"
+	"github.com/Terisback/robo-biba/utils"
 	"github.com/andersfylling/disgord"
 )
 
@@ -100,7 +101,7 @@ func Online(session disgord.Session, event *disgord.MessageCreate) {
 		disgord.Embed{
 			Title:  "Онлайн " + guild.Name,
 			Fields: embeds,
-			Color:  getIntColor(defaultEmbedColor),
+			Color:  utils.GetIntColor(utils.DefaultEmbedColor),
 		},
 	)
 	if err != nil {

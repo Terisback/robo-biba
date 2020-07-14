@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/Terisback/robo-biba/utils"
 	"github.com/andersfylling/disgord"
 )
 
@@ -19,7 +20,7 @@ func Help(session disgord.Session, event *disgord.MessageCreate) {
 	embed := disgord.Embed{
 		Title:       "Список команд",
 		Description: help,
-		Color:       getIntColor(defaultEmbedColor),
+		Color:       utils.GetIntColor(utils.DefaultEmbedColor),
 	}
 
 	_, err := event.Message.Reply(context.Background(), session, &embed)

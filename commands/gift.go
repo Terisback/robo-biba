@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/Terisback/robo-biba/internal/storage"
+	"github.com/Terisback/robo-biba/utils"
 	"github.com/andersfylling/disgord"
 )
 
@@ -45,7 +46,7 @@ func Gift(session disgord.Session, event *disgord.MessageCreate) {
 	}
 
 	embed := disgord.Embed{}
-	embed.Color = getIntColor(defaultEmbedColor)
+	embed.Color = utils.GetIntColor(utils.DefaultEmbedColor)
 
 	if gained {
 		d := expiration.UTC().Sub(time.Now().UTC())

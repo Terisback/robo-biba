@@ -12,14 +12,13 @@ import (
 )
 
 const (
-	cfNeutralColor = "f5f05f"
-	cfWinColor     = "66ed4e"
-	cfLoseColor    = "f55847"
-	cfNeutralCoin  = "https://cdn.discordapp.com/emojis/518875768814829568.png?v=1"
-	cfWinCoin      = "https://cdn.discordapp.com/emojis/518875768814829568.png?v=1"
-	cfLoseCoin     = "https://cdn.discordapp.com/emojis/518875812913610754.png?v=1"
-	cfMessage      = "**%s**\n__Ставка:__ **%d** <:rgd_coin_rgd:518875768814829568>\n__Баланс:__ **%d** <:rgd_coin_rgd:518875768814829568>"
-	cfHelp         = "Для игры напишите `!флип <сумма>`"
+	cfWinColor    = "66ed4e"
+	cfLoseColor   = "f55847"
+	cfNeutralCoin = "https://cdn.discordapp.com/emojis/518875768814829568.png?v=1"
+	cfWinCoin     = "https://cdn.discordapp.com/emojis/518875768814829568.png?v=1"
+	cfLoseCoin    = "https://cdn.discordapp.com/emojis/518875812913610754.png?v=1"
+	cfMessage     = "**%s**\n__Ставка:__ **%d** <:rgd_coin_rgd:518875768814829568>\n__Баланс:__ **%d** <:rgd_coin_rgd:518875768814829568>"
+	cfHelp        = "Для игры напишите `!флип <сумма>`"
 )
 
 func Coinflip(session disgord.Session, event *disgord.MessageCreate) {
@@ -35,7 +34,7 @@ func Coinflip(session disgord.Session, event *disgord.MessageCreate) {
 
 	if len(args) < 2 {
 		embed := disgord.Embed{}
-		embed.Color = getIntColor(defaultEmbedColor)
+		embed.Color = utils.GetIntColor(utils.DefaultEmbedColor)
 		embed.Description = cfHelp
 		_, err := session.SendMsg(context.Background(), event.Message.ChannelID, &embed)
 		if err != nil {
@@ -74,7 +73,7 @@ func Coinflip(session disgord.Session, event *disgord.MessageCreate) {
 
 		if balance-bet < 0 {
 			embed := disgord.Embed{}
-			embed.Color = getIntColor(defaultEmbedColor)
+			embed.Color = utils.GetIntColor(utils.DefaultEmbedColor)
 			embed.Author = &disgord.EmbedAuthor{IconURL: avatarURL, Name: fmt.Sprintf("%s вы не можете играть на сумму превышающую ваш баланс", nickname)}
 			_, err := event.Message.Reply(context.Background(), session, &embed)
 			if err != nil {
@@ -89,7 +88,7 @@ func Coinflip(session disgord.Session, event *disgord.MessageCreate) {
 		embed.Author = &disgord.EmbedAuthor{IconURL: avatarURL, Name: fmt.Sprintf("%s подбросил монетку", nickname)}
 		embed.Description = fmt.Sprintf(cfMessage, "ПОДБРАСЫВАЕМ...", bet, balance)
 		embed.Thumbnail = &disgord.EmbedThumbnail{URL: cfNeutralCoin}
-		embed.Color = getIntColor(defaultEmbedColor)
+		embed.Color = utils.GetIntColor(utils.DefaultEmbedColor)
 
 		msg, err := event.Message.Reply(context.Background(), session, &embed)
 		if err != nil {
@@ -122,7 +121,7 @@ func Coinflip(session disgord.Session, event *disgord.MessageCreate) {
 
 		embed.Description = fmt.Sprintf(cfMessage, newMessage, bet, balance)
 		embed.Thumbnail = &disgord.EmbedThumbnail{URL: newCoin}
-		embed.Color = getIntColor(newColor)
+		embed.Color = utils.GetIntColor(newColor)
 
 		_, err = session.SetMsgEmbed(context.Background(), msg.ChannelID, msg.ID, &embed)
 		if err != nil {

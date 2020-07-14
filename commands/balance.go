@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/Terisback/robo-biba/internal/storage"
+	"github.com/Terisback/robo-biba/utils"
 	"github.com/andersfylling/disgord"
 )
 
@@ -31,7 +32,7 @@ func Balance(session disgord.Session, event *disgord.MessageCreate) {
 	}
 
 	embed := disgord.Embed{}
-	embed.Color = getIntColor(defaultEmbedColor)
+	embed.Color = utils.GetIntColor(utils.DefaultEmbedColor)
 	embed.Author = &disgord.EmbedAuthor{IconURL: avatarURL, Name: nickname}
 	embed.Description = fmt.Sprintf(blDesc, balance)
 
