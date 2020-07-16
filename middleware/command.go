@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Terisback/robo-biba/utils"
+	"github.com/Terisback/robo-biba/internal/utils"
 	"github.com/andersfylling/disgord"
 )
 
