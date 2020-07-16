@@ -4,8 +4,8 @@ import (
 	"context"
 	"log"
 
+	"github.com/Terisback/robo-biba/internal/utils"
 	"github.com/Terisback/robo-biba/middleware"
-	"github.com/Terisback/robo-biba/utils"
 	"github.com/andersfylling/disgord"
 )
 

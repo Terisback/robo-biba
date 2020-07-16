@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/Terisback/robo-biba/internal/storage"
-	"github.com/Terisback/robo-biba/utils"
+	"github.com/Terisback/robo-biba/internal/utils"
 	"github.com/andersfylling/disgord"
 )
 
