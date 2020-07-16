@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/Terisback/robo-biba/internal/boolgen"
 	"github.com/Terisback/robo-biba/internal/storage"
 	"github.com/Terisback/robo-biba/internal/utils"
 	"github.com/Terisback/robo-biba/middleware"
@@ -19,6 +20,10 @@ const (
 	cfLoseCoin    = "https://cdn.discordapp.com/emojis/518875812913610754.png?v=1"
 	cfMessage     = "**%s**\n__Ставка:__ **%d** <:rgd_coin_rgd:518875768814829568>\n__Баланс:__ **%d** <:rgd_coin_rgd:518875768814829568>"
 	cfHelp        = "Для игры напишите `!флип <сумма>`"
+)
+
+var (
+	bg = boolgen.New()
 )
 
 func Coinflip(session disgord.Session, event *disgord.MessageCreate) {
@@ -82,7 +87,7 @@ func Coinflip(session disgord.Session, event *disgord.MessageCreate) {
 			return
 		}
 
-		win := utils.RandBool()
+		win := bg.RandBool()
 
 		embed := disgord.Embed{}
 		embed.Author = &disgord.EmbedAuthor{IconURL: avatarURL, Name: fmt.Sprintf("%s подбросил монетку", nickname)}
