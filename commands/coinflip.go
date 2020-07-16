@@ -33,17 +33,10 @@ func Coinflip(session disgord.Session, event *disgord.MessageCreate) {
 		return
 	}
 
-	var (
-		args = command.Arguments
-	)
+	args := command.Arguments
 
 	if len(args) < 2 {
-		embed := utils.GetDefaultEmbed()
-		embed.Description = cfHelp
-		_, err := session.SendMsg(context.Background(), event.Message.ChannelID, &embed)
-		if err != nil {
-			return
-		}
+		cfSendHelpMessage(session, event)
 		return
 	}
 
@@ -53,10 +46,6 @@ func Coinflip(session disgord.Session, event *disgord.MessageCreate) {
 
 		balance, err := storage.Balance(guildID, userID)
 		if err != nil {
-			_, err := event.Message.Reply(context.Background(), session, "Something went wrong...")
-			if err != nil {
-				return
-			}
 			return
 		}
 
@@ -64,78 +53,106 @@ func Coinflip(session disgord.Session, event *disgord.MessageCreate) {
 			bet = -bet
 		}
 
-		var nickname string = event.Message.Member.Nick
-
-		if nickname == "" {
-			nickname = event.Message.Author.Username
-		}
-
-		avatarURL, err := event.Message.Author.AvatarURL(64, false)
-		if err != nil {
-			return
-		}
-
 		if balance-bet < 0 {
-			embed := utils.GetDefaultEmbed()
-			embed.Author = &disgord.EmbedAuthor{IconURL: avatarURL, Name: fmt.Sprintf("%s вы не можете играть на сумму превышающую ваш баланс", nickname)}
-			_, err := event.Message.Reply(context.Background(), session, &embed)
-			if err != nil {
-				return
-			}
+			cfSendNotEnoughMessage(session, event)
 			return
 		}
 
 		win := bg.RandBool()
 
-		embed := utils.GetDefaultEmbed()
-		embed.Author = &disgord.EmbedAuthor{IconURL: avatarURL, Name: fmt.Sprintf("%s подбросил монетку", nickname)}
-		embed.Description = fmt.Sprintf(cfMessage, "ПОДБРАСЫВАЕМ...", bet, balance)
-		embed.Thumbnail = &disgord.EmbedThumbnail{URL: cfNeutralCoin}
-
-		msg, err := event.Message.Reply(context.Background(), session, &embed)
-		if err != nil {
-			return
-		}
-
-		var newColor string
-		var newCoin string
-		var newMessage string
+		msg := cfSendGameStartMessage(session, event, bet, balance)
 
 		if win {
-			balance, err = storage.AddCurrency(guildID, userID, bet)
-			if err != nil {
-				log.Println("Economy go brrrrrr")
-				return
-			}
-			newColor = cfWinColor
-			newCoin = cfWinCoin
-			newMessage = "ПОБЕДА!"
+			cfSendWinMessage(session, event, msg, bet)
 		} else {
-			balance, err = storage.SubCurrency(guildID, userID, bet)
-			if err != nil {
-				log.Println("Economy go brrrrrr")
-				return
-			}
-			newColor = cfLoseColor
-			newCoin = cfLoseCoin
-			newMessage = "ПОРАЖЕНИЕ"
+			cfSendLoseMessage(session, event, msg, bet)
 		}
 
-		embed.Description = fmt.Sprintf(cfMessage, newMessage, bet, balance)
-		embed.Thumbnail = &disgord.EmbedThumbnail{URL: newCoin}
-		embed.Color = utils.GetIntColor(newColor)
+	}
 
-		_, err = session.SetMsgEmbed(context.Background(), msg.ChannelID, msg.ID, embed)
-		if err != nil {
-			return
-		}
-	} else {
-		embed := utils.GetDefaultEmbed()
-		embed.Description = cfHelp
-		_, err := event.Message.Reply(context.Background(), session, &embed)
-		if err != nil {
-			return
-		}
+	cfSendHelpMessage(session, event)
+}
+
+func cfSendGameStartMessage(session disgord.Session, event *disgord.MessageCreate, bet, balance int) (msg *disgord.Message) {
+	nickname := event.Message.Member.Nick
+
+	if nickname == "" {
+		nickname = event.Message.Author.Username
+	}
+
+	avatarURL, err := event.Message.Author.AvatarURL(64, false)
+	if err != nil {
 		return
 	}
+
+	embed := utils.GetDefaultEmbed()
+	embed.Author = &disgord.EmbedAuthor{IconURL: avatarURL, Name: fmt.Sprintf("%s подбросил монетку", nickname)}
+	embed.Description = fmt.Sprintf(cfMessage, "ПОДБРАСЫВАЕМ...", bet, balance)
+	embed.Thumbnail = &disgord.EmbedThumbnail{URL: cfNeutralCoin}
+
+	msg, err = event.Message.Reply(context.Background(), session, embed)
+	if err != nil {
+		return &disgord.Message{}
+	}
+
+	return msg
+}
+
+func cfSendWinMessage(session disgord.Session, event *disgord.MessageCreate, msg *disgord.Message, bet int) {
+	guildID := event.Message.GuildID.String()
+	userID := event.Message.Author.ID.String()
+
+	balance, err := storage.AddCurrency(guildID, userID, bet)
+	if err != nil {
+		log.Println("Economy go brrrrrr")
+		return
+	}
+
+	embed := &disgord.Embed{}
+	embed.Description = fmt.Sprintf(cfMessage, "ПОБЕДА!", bet, balance)
+	embed.Thumbnail = &disgord.EmbedThumbnail{URL: cfWinCoin}
+	embed.Color = utils.GetIntColor(cfWinColor)
+
+	_, _ = session.SetMsgEmbed(context.Background(), msg.ChannelID, msg.ID, embed)
+}
+
+func cfSendLoseMessage(session disgord.Session, event *disgord.MessageCreate, msg *disgord.Message, bet int) {
+	guildID := event.Message.GuildID.String()
+	userID := event.Message.Author.ID.String()
+
+	balance, err := storage.SubCurrency(guildID, userID, bet)
+	if err != nil {
+		log.Println("Economy go brrrrrr")
+		return
+	}
+
+	embed := &disgord.Embed{}
+	embed.Description = fmt.Sprintf(cfMessage, "ПОРАЖЕНИЕ", bet, balance)
+	embed.Thumbnail = &disgord.EmbedThumbnail{URL: cfLoseCoin}
+	embed.Color = utils.GetIntColor(cfLoseColor)
+
+	_, _ = session.SetMsgEmbed(context.Background(), msg.ChannelID, msg.ID, embed)
+}
+
+func cfSendHelpMessage(session disgord.Session, event *disgord.MessageCreate) {
+	embed := utils.GetDefaultEmbed()
+	embed.Description = cfHelp
+	_, _ = event.Message.Reply(context.Background(), session, embed)
+}
+
+func cfSendNotEnoughMessage(session disgord.Session, event *disgord.MessageCreate) {
+	nickname := event.Message.Member.Nick
+
+	if nickname == "" {
+		nickname = event.Message.Author.Username
+	}
+
+	avatarURL, err := event.Message.Author.AvatarURL(64, false)
+	if err != nil {
+		return
+	}
+
+	embed := utils.GetDefaultEmbed()
+	embed.Author = &disgord.EmbedAuthor{IconURL: avatarURL, Name: fmt.Sprintf("%s вы не можете играть на сумму превышающую ваш баланс", nickname)}
+	_, _ = event.Message.Reply(context.Background(), session, embed)
 }
