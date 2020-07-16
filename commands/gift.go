@@ -45,8 +45,7 @@ func Gift(session disgord.Session, event *disgord.MessageCreate) {
 		return
 	}
 
-	embed := disgord.Embed{}
-	embed.Color = utils.GetIntColor(utils.DefaultEmbedColor)
+	embed := utils.GetDefaultEmbed()
 
 	if gained {
 		d := expiration.UTC().Sub(time.Now().UTC())
@@ -76,7 +75,7 @@ func Gift(session disgord.Session, event *disgord.MessageCreate) {
 		embed.Description = fmt.Sprintf(giftDesc, balance)
 	}
 
-	_, err = event.Message.Reply(context.Background(), session, &embed)
+	_, err = event.Message.Reply(context.Background(), session, embed)
 	if err != nil {
 		log.Println(err)
 		return

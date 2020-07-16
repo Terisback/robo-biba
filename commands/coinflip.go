@@ -38,8 +38,7 @@ func Coinflip(session disgord.Session, event *disgord.MessageCreate) {
 	)
 
 	if len(args) < 2 {
-		embed := disgord.Embed{}
-		embed.Color = utils.GetIntColor(utils.DefaultEmbedColor)
+		embed := utils.GetDefaultEmbed()
 		embed.Description = cfHelp
 		_, err := session.SendMsg(context.Background(), event.Message.ChannelID, &embed)
 		if err != nil {
@@ -77,8 +76,7 @@ func Coinflip(session disgord.Session, event *disgord.MessageCreate) {
 		}
 
 		if balance-bet < 0 {
-			embed := disgord.Embed{}
-			embed.Color = utils.GetIntColor(utils.DefaultEmbedColor)
+			embed := utils.GetDefaultEmbed()
 			embed.Author = &disgord.EmbedAuthor{IconURL: avatarURL, Name: fmt.Sprintf("%s вы не можете играть на сумму превышающую ваш баланс", nickname)}
 			_, err := event.Message.Reply(context.Background(), session, &embed)
 			if err != nil {
@@ -89,11 +87,10 @@ func Coinflip(session disgord.Session, event *disgord.MessageCreate) {
 
 		win := bg.RandBool()
 
-		embed := disgord.Embed{}
+		embed := utils.GetDefaultEmbed()
 		embed.Author = &disgord.EmbedAuthor{IconURL: avatarURL, Name: fmt.Sprintf("%s подбросил монетку", nickname)}
 		embed.Description = fmt.Sprintf(cfMessage, "ПОДБРАСЫВАЕМ...", bet, balance)
 		embed.Thumbnail = &disgord.EmbedThumbnail{URL: cfNeutralCoin}
-		embed.Color = utils.GetIntColor(utils.DefaultEmbedColor)
 
 		msg, err := event.Message.Reply(context.Background(), session, &embed)
 		if err != nil {
@@ -128,12 +125,12 @@ func Coinflip(session disgord.Session, event *disgord.MessageCreate) {
 		embed.Thumbnail = &disgord.EmbedThumbnail{URL: newCoin}
 		embed.Color = utils.GetIntColor(newColor)
 
-		_, err = session.SetMsgEmbed(context.Background(), msg.ChannelID, msg.ID, &embed)
+		_, err = session.SetMsgEmbed(context.Background(), msg.ChannelID, msg.ID, embed)
 		if err != nil {
 			return
 		}
 	} else {
-		embed := disgord.Embed{}
+		embed := utils.GetDefaultEmbed()
 		embed.Description = cfHelp
 		_, err := event.Message.Reply(context.Background(), session, &embed)
 		if err != nil {

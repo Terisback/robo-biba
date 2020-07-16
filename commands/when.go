@@ -27,9 +27,9 @@ func When(session disgord.Session, event *disgord.MessageCreate) {
 	}
 
 	if len(args) < 2 {
-		embed := disgord.Embed{}
+		embed := utils.GetDefaultEmbed()
 		embed.Description = "`!когда <id или упоминание>` - Узнать когда пользователь зашёл на сервер"
-		_, err := event.Message.Reply(context.Background(), session, &embed)
+		_, err := event.Message.Reply(context.Background(), session, embed)
 		if err != nil {
 			log.Println(err)
 		}
@@ -46,17 +46,16 @@ func When(session disgord.Session, event *disgord.MessageCreate) {
 		return
 	}
 
-	embed := disgord.Embed{}
+	embed := utils.GetDefaultEmbed()
 	embed.Description = "`!когда <id или упоминание>` - Узнать когда пользователь зашёл на сервер"
-	_, err = event.Message.Reply(context.Background(), session, &embed)
+	_, err = event.Message.Reply(context.Background(), session, embed)
 	if err != nil {
 		log.Println(err)
 	}
 }
 
 func whenEmbed(member *disgord.Member) *disgord.Embed {
-	embed := disgord.Embed{}
-	embed.Color = utils.GetIntColor(utils.DefaultEmbedColor)
+	embed := utils.GetDefaultEmbed()
 
 	nickname := member.Nick
 
@@ -66,5 +65,5 @@ func whenEmbed(member *disgord.Member) *disgord.Embed {
 
 	userJoinedAtDate := member.JoinedAt.Time
 	embed.Description = "**" + nickname + userJoinedAtDate.Format("** зашёл на сервер 02.01.2006 в 15:04:05 по Москве")
-	return &embed
+	return embed
 }

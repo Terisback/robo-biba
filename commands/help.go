@@ -17,13 +17,11 @@ func Help(session disgord.Session, event *disgord.MessageCreate) {
 	help += "`!подарок` - Получить в подарок раз в 2 часа от 10 до 50 монет\n"
 	help += "`!флип <сумма>` - Подкинуть монетку\n"
 
-	embed := disgord.Embed{
-		Title:       "Список команд",
-		Description: help,
-		Color:       utils.GetIntColor(utils.DefaultEmbedColor),
-	}
+	embed := utils.GetDefaultEmbed()
+	embed.Title = "Список команд"
+	embed.Description = help
 
-	_, err := event.Message.Reply(context.Background(), session, &embed)
+	_, err := event.Message.Reply(context.Background(), session, embed)
 	if err != nil {
 		fmt.Println(err)
 	}
